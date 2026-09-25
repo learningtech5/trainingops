@@ -1,0 +1,3429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Participant Change Manager Mockup</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f5f7fb;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 1250px;
+  margin: 30px auto;
+  padding: 0 20px 50px;
+}
+
+.header {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-end;
+}
+
+.eyebrow {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+}
+
+h1 {
+  font-size: 22px;
+  margin: 5px 0;
+}
+
+.muted {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+select,
+button {
+  font: inherit;
+}
+
+select {
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 8px;
+  padding: 9px 10px;
+}
+
+.stage-select {
+  min-width: 245px;
+}
+
+.stage-info {
+  margin-top: 14px;
+  padding: 13px 15px;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 13px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.panel {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.section-title {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.btn {
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 8px;
+  padding: 9px 14px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #f9fafb;
+}
+
+.btn-primary {
+  border: 0;
+  background: #4f46e5;
+  color: white;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: #4338ca;
+}
+
+.participants {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.participant {
+  display: grid;
+  grid-template-columns: 1fr 135px 135px 115px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.participant.cancelled {
+  opacity: .55;
+  background: #f9fafb;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.tag {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.claimable {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.nonclaimable {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.add-box,
+.cancel-section {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+.add-grid {
+  display: grid;
+  grid-template-columns: 1fr 150px 100px;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.add-grid select {
+  width: 100%;
+}
+
+.message {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+.cancel-card {
+  border: 1px solid #e5e7eb;
+  padding: 12px;
+  border-radius: 9px;
+  margin-top: 8px;
+}
+
+.cancel-card select {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.metric {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.metric-value {
+  font-size: 27px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.metric-sub {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 3px;
+}
+
+.hrdc {
+  margin-top: 12px;
+  border: 2px solid #c7d2fe;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fafaff;
+}
+
+.hrdc-title {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+
+.hrdc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 15px;
+  gap: 20px;
+}
+
+.hrdc-value {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.hrdc-note {
+  margin-top: 13px;
+  background: #f3f4f6;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.impact {
+  margin-top: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.impact-title {
+  background: #f9fafb;
+  padding: 11px 13px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.impact-row {
+  padding: 11px 13px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.impact-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.impact-description {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 3px;
+}
+
+.spending {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 15px;
+}
+
+.spending-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.review-btn {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+}
+
+.summary {
+  display: none;
+  margin-top: 12px;
+  padding: 14px;
+  background: #eef2ff;
+  border: 1px solid #a5b4fc;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.selectors {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.training-select {
+  min-width: 280px;
+}
+
+select:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.gate-msg {
+  margin-top: 22px;
+  padding: 30px;
+  text-align: center;
+  background: white;
+  border: 1px dashed #d1d5db;
+  border-radius: 14px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.pricing-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.breakdown {
+  margin-top: 10px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 8px;
+}
+
+.bd-row {
+  display: grid;
+  grid-template-columns: 60px 60px 1fr;
+  gap: 10px;
+  font-size: 12px;
+  padding: 3px 0;
+}
+
+.bd-row .amt {
+  text-align: right;
+  font-weight: 700;
+}
+
+.btn-submit {
+  border: 0;
+  background: #16a34a;
+  color: white;
+  font-weight: 600;
+}
+
+.btn-submit:hover {
+  background: #15803d;
+}
+
+.submit-msg {
+  display: none;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.submit-msg.warn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.audit-panel {
+  margin-top: 22px;
+}
+
+.audit-wrap {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.audit-table th {
+  text-align: left;
+  background: #f9fafb;
+  color: #6b7280;
+  font-weight: 700;
+  padding: 9px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.audit-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+  text-align: left;
+}
+
+.audit-table .nowrap {
+  white-space: nowrap;
+}
+
+.audit-changes {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.audit-note {
+  margin-top: 5px;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.btn-undo {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.audit-undone td {
+  color: #9ca3af;
+}
+
+.audit-undone td strong {
+  color: #9ca3af;
+}
+
+.audit-undone .audit-changes {
+  text-decoration: line-through;
+}
+
+.audit-undone-note {
+  margin-top: 5px;
+  color: #6b7280;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.audit-empty {
+  color: #6b7280;
+  text-align: center !important;
+  padding: 16px !important;
+}
+
+.free-seat-hint {
+  display: none;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.action-required {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  font-weight: 700;
+}
+
+.action-table {
+  width: 100%;
+  margin-top: 6px;
+  border-collapse: collapse;
+  font-weight: 400;
+}
+
+.action-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 6px;
+  border-bottom: 1px solid #fcd34d;
+}
+
+.action-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 6px;
+  border-bottom: 1px solid #fde68a;
+}
+
+.action-table .diff {
+  white-space: nowrap;
+  width: 1%;
+  padding-right: 16px;
+}
+
+.action-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.reminder-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 8px;
+  line-height: 1.6;
+}
+
+.amend-note {
+  margin-top: 12px;
+  padding: 12px;
+  background: white;
+  border: 1px solid #a5b4fc;
+  border-radius: 8px;
+}
+
+.amend-grid {
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  column-gap: 24px;
+  row-gap: 4px;
+  margin-top: 8px;
+}
+
+.amend-head {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.amend-reminder {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.amend-ok {
+  margin-top: 10px;
+  color: #166534;
+}
+
+.frozen-note {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+@media (max-width: 900px) {
+  .selectors {
+    flex-direction: column;
+  }
+
+  .training-select {
+    width: 100%;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stage-select {
+    width: 100%;
+  }
+
+  .participant {
+    grid-template-columns: 1fr;
+  }
+
+  .add-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+
+    <div>
+      <div class="eyebrow">Selected Training</div>
+      <h1 id="trainingName">No training selected</h1>
+      <div id="trainingMeta" class="muted">
+        Select a training to begin.
+      </div>
+    </div>
+
+    <div class="selectors">
+
+    <div>
+      <label for="training">Training</label>
+
+      <select id="training" class="training-select">
+        <option value="">Select training...</option>
+        <option value="t1">From Tester to Owner — Part B (Per pax)</option>
+        <option value="t2">Leading High-Performance Teams (Group)</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="stage">Administrative Stage</label>
+
+      <select id="stage" class="stage-select" disabled>
+        <option value="">
+          Select stage...
+        </option>
+
+        <option value="pre">
+          Before grant applied
+        </option>
+
+        <option value="amend">
+          Grant applied — amendable
+        </option>
+
+        <option value="locked">
+          Grant applied — too late to amend
+        </option>
+
+        <option value="claim">
+          Claim stage
+        </option>
+      </select>
+    </div>
+
+    </div>
+
+  </div>
+
+  <div id="gateMsg" class="gate-msg">
+    Select a training, then the administrative stage.
+  </div>
+
+  <div id="stageInfo" class="stage-info"></div>
+
+
+  <div id="layout" class="layout">
+
+    <!-- LEFT SIDE -->
+    <div class="panel">
+
+      <div class="section-header">
+
+        <div>
+          <div class="section-title">
+            Manage Participants
+          </div>
+
+          <div class="muted">
+            Cancel participants, add replacements or assign free seats.
+          </div>
+        </div>
+
+        <button id="resetBtn" class="btn">
+          Reset
+        </button>
+
+      </div>
+
+
+      <div id="participants" class="participants"></div>
+
+
+      <!-- ADD PARTICIPANT -->
+
+      <div class="add-box">
+
+        <strong>Add Participant</strong>
+
+        <div class="add-grid">
+
+          <select id="newPerson"></select>
+
+
+          <select id="newSeat">
+
+            <option value="chargeable">
+              Chargeable
+            </option>
+
+            <option value="free">
+              Free Seat
+            </option>
+
+          </select>
+
+
+          <button id="addBtn" class="btn btn-primary">
+            Add
+          </button>
+
+        </div>
+
+        <div id="freeSeatHint" class="free-seat-hint">
+          Grant can no longer be amended — new participants are added as free seats.
+        </div>
+
+        <div id="addMessage" class="message"></div>
+
+      </div>
+
+
+      <!-- CANCELLATION -->
+
+      <div class="cancel-section">
+
+        <strong>Cancellation Cost Treatment</strong>
+
+        <div class="muted">
+          Appears when a participant is cancelled.
+        </div>
+
+        <div id="cancellationOptions"></div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- RIGHT SIDE -->
+
+    <div class="panel">
+
+      <div class="section-title">
+        Impact Preview
+      </div>
+
+      <div class="muted">
+        Operational headcount and HRDC claimability are calculated separately.
+      </div>
+
+
+      <div class="metric-grid" style="margin-top:15px;">
+
+        <div class="metric">
+
+          <div class="metric-label">
+            Actual Pax
+          </div>
+
+          <div id="actualPax" class="metric-value">
+            0
+          </div>
+
+          <div class="metric-sub">
+            Attendance + evaluations
+          </div>
+
+        </div>
+
+
+        <div class="metric">
+
+          <div class="metric-label">
+            Catering Pax
+          </div>
+
+          <div id="cateringPax" class="metric-value">
+            0
+          </div>
+
+          <div id="cateringSub" class="metric-sub">
+            Includes free seats
+          </div>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- HRDC -->
+
+      <div class="hrdc">
+
+        <div class="hrdc-title">
+          HRDC Grant / Claim
+        </div>
+
+
+        <div class="hrdc-grid">
+
+          <div>
+
+            <div class="metric-label">
+              Pax Claimable
+            </div>
+
+            <div id="hrdcPax" class="hrdc-value">
+              0
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <div class="metric-label">
+              Amount Claimable
+            </div>
+
+            <div id="hrdcAmount" class="hrdc-value">
+              RM 0
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div id="hrdcNote" class="hrdc-note"></div>
+
+      </div>
+
+
+
+      <div class="metric-grid" style="margin-top:12px;">
+
+        <div class="metric">
+
+          <div class="metric-label">
+            Chargeable Seats
+          </div>
+
+          <div id="chargeableSeats" class="metric-value">
+            0
+          </div>
+
+        </div>
+
+
+        <div class="metric">
+
+          <div class="metric-label">
+            Free Seats
+          </div>
+
+          <div id="freeSeats" class="metric-value">
+            0
+          </div>
+
+          <div class="metric-sub">
+            HRDC non-claimable
+          </div>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- DOWNSTREAM IMPACT -->
+
+      <div class="impact">
+
+        <div class="impact-title">
+          Downstream Impact
+        </div>
+
+        <div id="impactRows"></div>
+
+      </div>
+
+
+
+      <!-- SPENDING -->
+
+      <div class="spending">
+
+        <div class="spending-top">
+
+          <span>
+            Division Spending
+          </span>
+
+          <strong id="divisionSpending">
+            RM 0
+          </strong>
+
+        </div>
+
+        <div
+          id="spendingNote"
+          class="impact-description"
+          style="margin-top:7px;">
+        </div>
+
+        <div id="spendingBreakdown"></div>
+
+      </div>
+
+
+
+      <button
+        id="reviewBtn"
+        class="btn btn-primary review-btn">
+
+        Review Changes
+
+      </button>
+
+
+      <button
+        id="submitBtn"
+        class="btn btn-submit review-btn"
+        style="margin-top:8px;">
+
+        Submit
+
+      </button>
+
+
+      <div
+        id="submitMsg"
+        class="submit-msg">
+      </div>
+
+
+      <div
+        id="summary"
+        class="summary">
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- AUDIT LOG -->
+
+  <div id="auditPanel" class="panel audit-panel">
+
+    <div class="section-header">
+
+      <div>
+        <div class="section-title">
+          Audit Log
+        </div>
+
+        <div class="muted">
+          Every submission for this training, latest first. Saved in this browser.
+        </div>
+      </div>
+
+      <button id="clearHistoryBtn" class="btn">
+        Clear History
+      </button>
+
+    </div>
+
+    <div class="audit-wrap">
+
+      <table class="audit-table">
+
+        <thead>
+          <tr>
+            <th>Date / Time</th>
+            <th>Stage</th>
+            <th>Changes</th>
+            <th>Claimable Pax</th>
+            <th>Claimable Amount</th>
+            <th>Division Spending</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody id="auditBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+/*
+  MOCKUP TRAININGS
+
+  t1 = per pax pricing (RM1,500 per pax)
+  t2 = group pricing (flat group fee)
+
+  In your real system these figures would come from
+  your actual HRDC/entity costing logic.
+*/
+
+const trainings = {
+
+  t1: {
+    name: "From Tester to Owner — Part B",
+    dates: "18-20 Nov 2026",
+    provider: "IMS Asia",
+    pricing: "perpax",
+    ratePerPax: 1500,
+    participants: [
+      { id: 1, name: "Tracy Wong", division: "HEB" },
+      { id: 2, name: "Amir Hakim", division: "HKS" },
+      { id: 3, name: "Mei Xin", division: "HDH" },
+      { id: 4, name: "Jonathan Tan", division: "EBI" },
+      { id: 5, name: "Siti Aisyah", division: "HEB" },
+      { id: 6, name: "Kevin Ong", division: "HKS" }
+    ]
+  },
+
+  t2: {
+    name: "Leading High-Performance Teams",
+    dates: "8-9 Dec 2026",
+    provider: "Apex Learning",
+    pricing: "group",
+    groupFee: 12000,
+    participants: [
+      { id: 1, name: "Farah Aziz", division: "HEB" },
+      { id: 2, name: "Leong Wei Jie", division: "HKS" },
+      { id: 3, name: "Priya Nair", division: "EBI" },
+      { id: 4, name: "Hafiz Rahman", division: "HDH" },
+      { id: 5, name: "Chloe Lim", division: "HEB" }
+    ]
+  }
+
+};
+
+
+/*
+  EMPLOYEES AVAILABLE TO ADD (mockup)
+*/
+
+const employeePool = [
+  { name: "Alicia Tan", division: "HEB" },
+  { name: "Daniel Lee", division: "HKS" },
+  { name: "Nur Izzati", division: "HDH" },
+  { name: "Marcus Lim", division: "EBI" },
+  { name: "Aina Sofea", division: "MGK" }
+];
+
+
+let participants = [];
+let nextId = 100;
+
+
+/*
+  Keep new IDs unique after reloading saved data.
+*/
+
+function syncNextId() {
+
+  Object.values(trainingState).forEach(st =>
+    st.committed.forEach(p => {
+      if (p.id >= nextId) nextId = p.id + 1;
+    })
+  );
+
+}
+
+
+/*
+  SUBMITTED STATE (per training)
+
+  committed = participant list as at last submission
+  grant     = HRDC grant figures as at last submission
+              (updates only when submitted before grant
+               applied or while grant is amendable)
+  log       = audit log of submissions
+*/
+
+/*
+  BROWSER CACHE
+
+  Submitted lists, grant figures and audit logs are
+  saved to this browser (localStorage) on every
+  submission, and reloaded when the page opens.
+*/
+
+const STORAGE_KEY = "participantChangeManager.v1";
+
+
+function loadState() {
+
+  try {
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    return saved ? JSON.parse(saved) : {};
+
+  }
+
+  catch (e) {
+
+    return {};
+
+  }
+
+}
+
+
+function saveState() {
+
+  try {
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(trainingState));
+
+  }
+
+  catch (e) {
+
+    /* storage unavailable — history kept for this session only */
+
+  }
+
+}
+
+
+const trainingState = loadState();
+
+
+function clone(list) {
+
+  return list.map(p => ({ ...p }));
+
+}
+
+
+function getState() {
+
+  const key =
+    document.getElementById("training").value;
+
+  const training = trainings[key];
+
+  if (!training) return null;
+
+
+  if (!trainingState[key]) {
+
+    const committed =
+      training.participants.map(p => ({
+        ...p,
+        status: "active",
+        seatType: "chargeable",
+        costTreatment: "remain",
+        isNew: false,
+        submitted: false
+      }));
+
+
+    /*
+      Initial grant: original participant list.
+      EBI excluded. Group fee split across all original pax.
+    */
+
+    const claimable =
+      committed.filter(p => !isNonClaimableEntity(p));
+
+    const perPax =
+      training.pricing === "perpax"
+        ? training.ratePerPax
+        : training.groupFee / committed.length;
+
+
+    trainingState[key] = {
+      committed: committed,
+      grant: {
+        pax: claimable.length,
+        amount: claimable.length * perPax,
+        perPax: perPax,
+        byDivision: groupByDivision(claimable, perPax)
+      },
+      cateringPax: committed.length,
+      log: []
+    };
+
+  }
+
+
+  /*
+    Older saved data without a catering figure:
+    use the submitted active pax.
+  */
+
+  if (trainingState[key].cateringPax === undefined) {
+
+    trainingState[key].cateringPax =
+      trainingState[key].committed.filter(p => p.status === "active").length;
+
+  }
+
+  return trainingState[key];
+
+}
+
+
+
+function getTraining() {
+
+  return trainings[
+    document.getElementById("training").value
+  ] || null;
+
+}
+
+
+
+function getStage() {
+
+  return document.getElementById("stage").value;
+
+}
+
+
+
+function isGrantFrozen() {
+
+  const stage = getStage();
+
+  return stage === "locked" || stage === "claim";
+
+}
+
+
+
+function formatRM(n) {
+
+  return "RM " + n.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+
+}
+
+
+
+function resetDemo() {
+
+  const state = getState();
+
+  participants =
+    state ? clone(state.committed) : [];
+
+
+  document.getElementById("summary").style.display = "none";
+
+  document.getElementById("submitMsg").style.display = "none";
+
+  document.getElementById("addMessage").textContent = "";
+
+  render();
+
+}
+
+
+
+function getActiveParticipants() {
+
+  return participants.filter(
+    p => p.status === "active"
+  );
+
+}
+
+
+
+function getFreeSeats() {
+
+  return getActiveParticipants().filter(
+    p => p.seatType === "free"
+  );
+
+}
+
+
+
+function getChargeableParticipants() {
+
+  return getActiveParticipants().filter(
+    p => p.seatType === "chargeable"
+  );
+
+}
+
+
+
+/*
+  HRDC RULE
+
+  Free seat = NOT claimable.
+  EBI entity = NOT claimable (always).
+
+  Therefore:
+
+  HRDC claimable pax =
+  Active + Chargeable + non-EBI participants only.
+*/
+
+const NON_CLAIMABLE_ENTITIES = ["EBI"];
+
+
+function isNonClaimableEntity(p) {
+
+  return NON_CLAIMABLE_ENTITIES.includes(p.division);
+
+}
+
+
+function getHRDCClaimableParticipants() {
+
+  return getActiveParticipants().filter(
+    p => p.seatType === "chargeable" && !isNonClaimableEntity(p)
+  );
+
+}
+
+
+function getEBIChargeable() {
+
+  return getChargeableParticipants().filter(isNonClaimableEntity);
+
+}
+
+
+
+/*
+  GROUP BY DIVISION
+
+  Returns [{ division, pax, amount }]
+*/
+
+function groupByDivision(list, perPax) {
+
+  const map = {};
+
+  list.forEach(p => {
+
+    map[p.division] = (map[p.division] || 0) + 1;
+
+  });
+
+  return Object.keys(map).map(d => ({
+    division: d,
+    pax: map[d],
+    amount: map[d] * perPax
+  }));
+
+}
+
+
+
+/*
+  HRDC CLAIMABLE
+
+  Per pax:
+    claimable pax × rate per pax.
+
+  Group:
+    Before grant / amendable:
+      group fee ÷ total chargeable pax (incl. EBI)
+      × division claimable pax.
+      (Cancelled and free seats excluded.
+       EBI takes a share of the fee, but its
+       share is not claimable.)
+
+    Grant applied, not amendable / claim stage:
+      Keep original grant figures unchanged.
+      Claimable amount to be updated manually later.
+*/
+
+/*
+  HRDC for any participant list (ignores stage).
+  Used for the live figures, the grant snapshot
+  and the audit log.
+*/
+
+function computeHRDC(list) {
+
+  const training = getTraining();
+
+  const chargeable = list.filter(p =>
+    p.status === "active" && p.seatType === "chargeable"
+  );
+
+  const claimable =
+    chargeable.filter(p => !isNonClaimableEntity(p));
+
+  const perPax =
+    training.pricing === "perpax"
+      ? training.ratePerPax
+      : (chargeable.length > 0 ? training.groupFee / chargeable.length : 0);
+
+  return {
+    pax: claimable.length,
+    amount: claimable.length * perPax,
+    perPax: perPax,
+    sharingPax: chargeable.length,
+    frozen: false,
+    byDivision: groupByDivision(claimable, perPax)
+  };
+
+}
+
+
+
+function getHRDC() {
+
+  const training = getTraining();
+
+  const claimable = getHRDCClaimableParticipants();
+
+
+  if (training.pricing === "perpax") {
+
+    return {
+      pax: claimable.length,
+      amount: claimable.length * training.ratePerPax,
+      perPax: training.ratePerPax,
+      frozen: false,
+      byDivision: groupByDivision(claimable, training.ratePerPax)
+    };
+
+  }
+
+
+  if (isGrantFrozen()) {
+
+    const grant = getState().grant;
+
+    return {
+      ...grant,
+      frozen: true,
+      currentPax: claimable.length
+    };
+
+  }
+
+
+  const sharingPax =
+    getChargeableParticipants().length;
+
+  const perPax =
+    sharingPax > 0
+      ? training.groupFee / sharingPax
+      : 0;
+
+  return {
+    pax: claimable.length,
+    amount: claimable.length * perPax,
+    perPax: perPax,
+    sharingPax: sharingPax,
+    frozen: false,
+    byDivision: groupByDivision(claimable, perPax)
+  };
+
+}
+
+
+
+/*
+  CURRENT GRANT (before this change)
+
+  Grant figures as at the last submission
+  (or the original list if nothing submitted yet).
+*/
+
+function getOriginalHRDC() {
+
+  return getState().grant;
+
+}
+
+
+
+function getHRDCClaimableAmount() {
+
+  return getHRDC().amount;
+
+}
+
+
+
+/*
+  PARTICIPANTS COUNTED FOR SPENDING
+
+  After grant / cost lock, a cancelled participant
+  may still remain chargeable if the organisation
+  is already committed to the cost.
+
+  Before the cost is locked, only current chargeable
+  participants contribute to spending.
+*/
+
+function getSpendingParticipants(list = participants) {
+
+  if (isGrantFrozen()) {
+
+    return list.filter(p =>
+      (p.status === "active" && p.seatType === "chargeable")
+      ||
+      (p.status === "cancelled" && p.costTreatment === "remain")
+    );
+
+  }
+
+  return list.filter(p =>
+    p.status === "active" && p.seatType === "chargeable"
+  );
+
+}
+
+
+
+/*
+  DIVISION SPENDING
+
+  Per pax: rate × counted pax.
+  Group:   group fee split equally across counted pax.
+*/
+
+function getSpending(source = participants) {
+
+  const training = getTraining();
+
+  const list = getSpendingParticipants(source);
+
+
+  const perPax =
+    training.pricing === "perpax"
+      ? training.ratePerPax
+      : (list.length > 0 ? training.groupFee / list.length : 0);
+
+
+  return {
+    pax: list.length,
+    perPax: perPax,
+    total: list.length * perPax,
+    byDivision: groupByDivision(list, perPax)
+  };
+
+}
+
+
+
+function getDivisionSpending() {
+
+  return getSpending().total;
+
+}
+
+
+
+function breakdownHTML(rows) {
+
+  if (rows.length === 0) return "";
+
+  return `<div class="breakdown">` +
+    rows.map(r => `
+      <div class="bd-row">
+        <span>${r.division}</span>
+        <span>${r.pax} pax</span>
+        <span class="amt">${formatRM(r.amount)}</span>
+      </div>
+    `).join("") +
+  `</div>`;
+
+}
+
+
+
+function renderParticipants() {
+
+  const container =
+    document.getElementById("participants");
+
+
+  container.innerHTML = "";
+
+
+  participants.filter(p => !p.hidden).forEach(participant => {
+
+    const row =
+      document.createElement("div");
+
+
+    row.className =
+      "participant"
+      +
+      (
+        participant.status === "cancelled"
+        ? " cancelled"
+        : ""
+      );
+
+
+    const info =
+      document.createElement("div");
+
+
+    info.innerHTML = `
+      <div class="name">
+        ${participant.name}
+      </div>
+
+      <div class="muted">
+        ${participant.division}
+        ${participant.isNew
+          ? " · Newly added"
+          : ""}
+        ${participant.submitted && participant.status === "cancelled"
+          ? " · Cancellation submitted"
+          : ""}
+        ${participant.submitted && participant.status === "active"
+          ? " · Reinstated"
+          : ""}
+      </div>
+    `;
+
+
+    /*
+      STATUS
+    */
+
+    const status =
+      document.createElement("select");
+
+
+    status.innerHTML = `
+      <option value="active">
+        Active
+      </option>
+
+      <option value="cancelled">
+        Cancelled
+      </option>
+    `;
+
+
+    status.value =
+      participant.status;
+
+
+
+
+    status.addEventListener(
+      "change",
+      function () {
+
+        participant.status =
+          this.value;
+
+        render();
+
+      }
+    );
+
+
+
+    /*
+      SEAT TYPE
+    */
+
+    const seat =
+      document.createElement("select");
+
+
+    seat.innerHTML = `
+      <option value="chargeable">
+        Chargeable
+      </option>
+
+      <option value="free">
+        Free Seat
+      </option>
+    `;
+
+
+    seat.value =
+      participant.seatType;
+
+
+    /*
+      Added at "too late to amend" onwards:
+      free seat, cannot be switched to chargeable.
+    */
+
+    const addedWhileLocked =
+      isGrantFrozen()
+      &&
+      (participant.isNew || (participant.submitted && participant.status === "active"));
+
+    seat.disabled =
+      participant.status === "cancelled" || addedWhileLocked;
+
+
+    seat.addEventListener(
+      "change",
+      function () {
+
+        participant.seatType =
+          this.value;
+
+        render();
+
+      }
+    );
+
+
+
+    /*
+      HRDC STATUS
+    */
+
+    const hrdc =
+      document.createElement("div");
+
+
+    if (
+      participant.status === "cancelled"
+    ) {
+
+      hrdc.innerHTML =
+        `<span class="tag inactive">
+          Not Active
+        </span>`;
+
+    }
+
+    else if (
+      participant.seatType === "free"
+      ||
+      isNonClaimableEntity(participant)
+    ) {
+
+      hrdc.innerHTML =
+        `<span class="tag nonclaimable">
+          Non-Claimable
+        </span>`;
+
+    }
+
+    else {
+
+      hrdc.innerHTML =
+        `<span class="tag claimable">
+          Claimable
+        </span>`;
+
+    }
+
+
+    row.appendChild(info);
+
+    row.appendChild(status);
+
+    row.appendChild(seat);
+
+    row.appendChild(hrdc);
+
+
+    container.appendChild(row);
+
+  });
+
+}
+
+
+
+function renderCancellationOptions() {
+
+  const container =
+    document.getElementById(
+      "cancellationOptions"
+    );
+
+
+  const cancelled =
+    participants.filter(
+      p => p.status === "cancelled" && !p.hidden
+    );
+
+
+  if (cancelled.length === 0) {
+
+    container.innerHTML = `
+      <div class="message"
+           style="
+             background:#f9fafb;
+             padding:12px;
+             border-radius:8px;
+             margin-top:10px;
+           ">
+
+        No cancellations selected.
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML = "";
+
+
+  cancelled.forEach(participant => {
+
+    const card =
+      document.createElement("div");
+
+
+    card.className =
+      "cancel-card";
+
+
+    card.innerHTML = `
+      <strong>
+        ${participant.name}
+      </strong>
+
+      <div class="muted">
+        ${participant.division}
+      </div>
+    `;
+
+
+    const select =
+      document.createElement("select");
+
+
+    select.innerHTML = `
+
+      <option value="remain">
+        Cost remains chargeable
+      </option>
+
+      <option value="remove">
+        Remove participant cost
+      </option>
+
+      <option value="transfer">
+        Transfer cost to replacement
+      </option>
+
+    `;
+
+
+    select.value =
+      participant.costTreatment;
+
+
+    select.disabled =
+      participant.submitted;
+
+
+    select.addEventListener(
+      "change",
+      function () {
+
+        participant.costTreatment =
+          this.value;
+
+        renderImpact();
+
+      }
+    );
+
+
+    /*
+      Before grant applied / amendable:
+      no choice — cost is removed entirely.
+    */
+
+    if (!isGrantFrozen() && !participant.submitted) {
+
+      const note = document.createElement("div");
+
+      note.className = "message";
+
+      note.textContent =
+        "Cost removed entirely. Division costs will be recalculated.";
+
+      card.appendChild(note);
+
+    }
+
+    else {
+
+      card.appendChild(select);
+
+    }
+
+    container.appendChild(card);
+
+  });
+
+}
+
+
+
+function impactRow(
+  title,
+  value,
+  description
+) {
+
+  return `
+
+    <div class="impact-row">
+
+      <div class="impact-top">
+
+        <span>
+          ${title}
+        </span>
+
+        <strong>
+          ${value}
+        </strong>
+
+      </div>
+
+      <div class="impact-description">
+        ${description}
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+
+function renderImpact() {
+
+  const stage =
+    document.getElementById("stage").value;
+
+
+  const actual =
+    getActiveParticipants().length;
+
+
+  /*
+    CATERING
+
+    Before grant applied / amendable: follows active pax.
+    Too late to amend onwards: locked at the last
+    figure submitted before that point.
+  */
+
+  const catering =
+    isGrantFrozen()
+      ? getState().cateringPax
+      : actual;
+
+
+  const free =
+    getFreeSeats().length;
+
+
+  const chargeable =
+    getChargeableParticipants().length;
+
+
+  const training =
+    getTraining();
+
+
+  const hrdc =
+    getHRDC();
+
+
+  const claimable =
+    hrdc.pax;
+
+
+  const claimableAmount =
+    hrdc.amount;
+
+
+  const spendingData =
+    getSpending();
+
+
+  const spending =
+    spendingData.total;
+
+
+
+  document.getElementById(
+    "actualPax"
+  ).textContent =
+    actual;
+
+
+  document.getElementById(
+    "cateringPax"
+  ).textContent =
+    catering;
+
+
+  /*
+    Actual pax above locked catering pax = shown in red.
+  */
+
+  const actualText =
+    catering !== actual
+      ? ` · <span style="${actual > catering ? "color:#dc2626;" : ""}">actual pax is ${actual}</span>`
+      : "";
+
+  document.getElementById(
+    "cateringSub"
+  ).innerHTML =
+    isGrantFrozen()
+      ? "Locked" + actualText
+      : "Includes free seats";
+
+
+  document.getElementById(
+    "chargeableSeats"
+  ).textContent =
+    chargeable;
+
+
+  document.getElementById(
+    "freeSeats"
+  ).textContent =
+    free;
+
+
+  document.getElementById(
+    "hrdcPax"
+  ).textContent =
+    claimable + " pax";
+
+
+  document.getElementById(
+    "hrdcAmount"
+  ).textContent =
+    formatRM(claimableAmount);
+
+
+
+  /*
+    HRDC EXPLANATION
+  */
+
+  const hrdcNote =
+    document.getElementById(
+      "hrdcNote"
+    );
+
+
+  hrdcNote.classList.toggle("frozen-note", hrdc.frozen);
+
+
+  if (hrdc.frozen) {
+
+    hrdcNote.innerHTML = `
+
+      <strong>Grant applied, figures locked in</strong>
+      <br>
+      Excludes cancellations, free seats and EBI
+
+    ` + breakdownHTML(hrdc.byDivision) + `
+
+    ` + actionRequiredHTML(hrdc);
+
+  }
+
+  else if (free > 0) {
+
+    hrdcNote.innerHTML = `
+
+      <strong>
+        ${free} free seat${free > 1 ? "s" : ""}
+        excluded from HRDC.
+      </strong>
+
+      <br>
+
+      Free seats still flow to attendance,
+      catering, employee evaluation and
+      superior evaluation, but contribute
+
+      <strong>
+        0 pax and RM0
+      </strong>
+
+      to the HRDC claim.
+
+    `;
+
+  }
+
+  else {
+
+    hrdcNote.innerHTML = `
+
+      All active participants are currently
+      chargeable and HRDC claimable.
+
+    `;
+
+  }
+
+
+  /*
+    EBI NOTE (overrides the "all claimable" message)
+  */
+
+  const ebi =
+    getEBIChargeable().length;
+
+  if (!hrdc.frozen && ebi > 0) {
+
+    const ebiLine = `
+      <strong>
+        ${ebi} EBI pax excluded from HRDC.
+      </strong>
+      EBI is not claimable.
+    `;
+
+    hrdcNote.innerHTML =
+      free > 0
+        ? hrdcNote.innerHTML + "<br><br>" + ebiLine
+        : ebiLine;
+
+  }
+
+
+  /*
+    BREAKDOWN BY DIVISION (not frozen)
+  */
+
+  if (!hrdc.frozen) {
+
+    if (training.pricing === "group" && hrdc.pax > 0) {
+
+      hrdcNote.innerHTML += `
+        <br><br>
+        Group fee ${formatRM(training.groupFee)}
+        ÷ ${hrdc.sharingPax} chargeable pax
+        = <strong>${formatRM(hrdc.perPax)}</strong> per pax.
+        ${ebi > 0
+          ? `EBI share of ${formatRM(ebi * hrdc.perPax)} is not claimable.`
+          : ""}
+      `;
+
+    }
+
+    hrdcNote.innerHTML += breakdownHTML(hrdc.byDivision);
+
+  }
+
+
+
+  /*
+    ADMIN STAGE MESSAGE
+  */
+
+  const stageMessages = {
+
+    pre:
+      "Grant has not been applied yet. Participant changes can recalculate the HRDC application, cost allocation and downstream records.",
+
+    amend:
+      "Grant has already been applied but can still be amended. Revised HRDC figures should trigger a grant amendment.",
+
+    locked:
+      "Grant has already been applied and is too late to amend. Preserve the original grant application as a snapshot, while current claimable pax and amount reflect the actual participant situation.",
+
+    claim:
+      "Claim stage. Current eligible participants determine the HRDC pax and amount claimable."
+
+  };
+
+
+  document.getElementById(
+    "stageInfo"
+  ).textContent =
+    hrdc.frozen
+      ? "Grant has already been applied and is too late to amend. Group pricing: HRDC figures stay as per the original grant and must be updated manually later."
+      : stageMessages[stage];
+
+
+
+  /*
+    DOWNSTREAM SYSTEM IMPACT
+  */
+
+  document.getElementById(
+    "impactRows"
+  ).innerHTML =
+
+    impactRow(
+      "Attendance",
+      actual + " pax",
+      "All active participants, including free seats."
+    )
+
+    +
+
+    impactRow(
+      "Employee Evaluation",
+      actual + " pax",
+      "Always follows active participants."
+    )
+
+    +
+
+    impactRow(
+      "Superior Evaluation",
+      actual + " pax",
+      "Always follows active participants."
+    )
+
+    +
+
+    impactRow(
+      "Catering",
+      catering + " pax",
+      isGrantFrozen()
+        ? "Locked. Participant changes no longer affect catering."
+        : "Free seats are still included."
+    )
+
+    +
+
+    impactRow(
+      "HRDC Claim",
+      claimable
+      +
+      " pax · "
+      +
+      formatRM(claimableAmount),
+
+      hrdc.frozen
+        ? "Kept as per original grant. Update the claimable amount manually later."
+        : "Free seats, EBI pax and cancelled participants are excluded."
+    )
+
+    +
+
+    impactRow(
+      "Division Spending",
+      formatRM(spending),
+
+      "Calculated separately from HRDC claimability."
+    );
+
+
+
+  document.getElementById(
+    "divisionSpending"
+  ).textContent =
+
+    formatRM(spending);
+
+
+  document.getElementById(
+    "spendingBreakdown"
+  ).innerHTML =
+    breakdownHTML(spendingData.byDivision);
+
+
+
+  /*
+    SPENDING EXPLANATION
+  */
+
+  if (
+    stage === "locked"
+    ||
+    stage === "claim"
+  ) {
+
+    document.getElementById(
+      "spendingNote"
+    ).textContent =
+
+      "Because the training cost is already committed, a cancelled participant can remain under division spending depending on the selected cost treatment.";
+
+  }
+
+  else {
+
+    document.getElementById(
+      "spendingNote"
+    ).textContent =
+
+      "Before the cost is locked, spending recalculates based on the current chargeable participants.";
+
+  }
+
+
+  if (
+    training.pricing === "group"
+    &&
+    spendingData.pax > 0
+  ) {
+
+    document.getElementById(
+      "spendingNote"
+    ).textContent +=
+
+      " Group fee " + formatRM(training.groupFee)
+      + " split equally across " + spendingData.pax
+      + " pax = " + formatRM(spendingData.perPax) + " per pax.";
+
+  }
+
+}
+
+
+
+function renderHeader() {
+
+  const training = getTraining();
+
+  if (!training) {
+
+    document.getElementById("trainingName").textContent =
+      "No training selected";
+
+    document.getElementById("trainingMeta").textContent =
+      "Select a training to begin.";
+
+    return;
+
+  }
+
+  document.getElementById("trainingName").textContent =
+    training.name;
+
+  const pricingText =
+    training.pricing === "perpax"
+      ? "Per pax pricing · " + formatRM(training.ratePerPax) + " / pax"
+      : "Group pricing · " + formatRM(training.groupFee)
+        + " (" + training.participants.length + " pax)";
+
+  document.getElementById("trainingMeta").innerHTML =
+    training.dates + " · " + training.provider
+    + ` <span class="pricing-tag">${pricingText}</span>`;
+
+}
+
+
+
+function render() {
+
+  renderHeader();
+
+  const ready = getTraining() && getStage();
+
+  document.getElementById("gateMsg").style.display =
+    ready ? "none" : "block";
+
+  document.getElementById("gateMsg").textContent =
+    getTraining()
+      ? "Now select the administrative stage."
+      : "Select a training, then the administrative stage.";
+
+  document.getElementById("stageInfo").style.display =
+    ready ? "block" : "none";
+
+  document.getElementById("layout").style.display =
+    ready ? "grid" : "none";
+
+  document.getElementById("auditPanel").style.display =
+    ready ? "block" : "none";
+
+  if (!ready) return;
+
+  renderAuditLog();
+
+  renderAddOptions();
+
+
+  /*
+    Too late to amend onwards: additional pax = free seat.
+  */
+
+  const seatSelect =
+    document.getElementById("newSeat");
+
+  if (isGrantFrozen()) {
+
+    seatSelect.value = "free";
+
+    seatSelect.disabled = true;
+
+  }
+
+  else {
+
+    seatSelect.disabled = false;
+
+  }
+
+  document.getElementById("freeSeatHint").style.display =
+    isGrantFrozen() ? "block" : "none";
+
+  enforceFreeSeats();
+
+  renderParticipants();
+
+  renderCancellationOptions();
+
+  renderImpact();
+
+}
+
+
+
+/*
+  ADD PARTICIPANT
+*/
+
+document.getElementById(
+  "addBtn"
+).addEventListener(
+  "click",
+  function () {
+
+    const employeeValue =
+      document.getElementById(
+        "newPerson"
+      ).value;
+
+
+    const seatType =
+      isGrantFrozen()
+        ? "free"
+        : document.getElementById(
+            "newSeat"
+          ).value;
+
+
+    const message =
+      document.getElementById(
+        "addMessage"
+      );
+
+
+    if (!employeeValue) {
+
+      message.textContent =
+        "Select an employee first.";
+
+      return;
+
+    }
+
+
+    const [
+      name,
+      division
+    ] =
+      employeeValue.split("|");
+
+
+
+    const alreadyActive =
+      participants.some(
+        p =>
+          p.name === name
+          &&
+          p.status === "active"
+      );
+
+
+    if (alreadyActive) {
+
+      message.textContent =
+        name
+        +
+        " is already an active participant.";
+
+      return;
+
+    }
+
+
+
+    /*
+      Previously cancelled? Reinstate the same row
+      instead of adding a duplicate.
+    */
+
+    const cancelledRow =
+      participants.find(
+        p => p.name === name && p.status === "cancelled"
+      );
+
+    if (cancelledRow) {
+
+      cancelledRow.status = "active";
+
+      cancelledRow.hidden = false;
+
+      cancelledRow.seatType = seatType;
+
+      document.getElementById("newPerson").value = "";
+
+      message.textContent =
+        name + " reinstated as " + seatLabel(seatType).toLowerCase() + ".";
+
+      render();
+
+      return;
+
+    }
+
+
+    participants.push({
+
+      id: nextId++,
+
+      name: name,
+
+      division: division,
+
+      status: "active",
+
+      seatType: seatType,
+
+      costTreatment: "remain",
+
+      isNew: true,
+
+      submitted: false
+
+    });
+
+
+
+    document.getElementById(
+      "newPerson"
+    ).value = "";
+
+
+    if (seatType === "free") {
+
+      message.textContent =
+        name
+        +
+        " added as a free seat. HRDC non-claimable.";
+
+    }
+
+    else if (division === "EBI") {
+
+      message.textContent =
+        name
+        +
+        " added as a chargeable participant. EBI is HRDC non-claimable.";
+
+    }
+
+    else {
+
+      message.textContent =
+        name
+        +
+        " added as a chargeable participant.";
+
+    }
+
+
+    render();
+
+  }
+);
+
+
+
+/*
+  STAGE CHANGE
+*/
+
+document.getElementById(
+  "stage"
+).addEventListener(
+  "change",
+  render
+);
+
+
+
+/*
+  TRAINING CHANGE
+
+  Loads that training's participants and
+  requires the stage to be selected again.
+*/
+
+document.getElementById(
+  "training"
+).addEventListener(
+  "change",
+  function () {
+
+    const stage =
+      document.getElementById("stage");
+
+    stage.value = "";
+
+    stage.disabled = !this.value;
+
+    resetDemo();
+
+  }
+);
+
+
+
+/*
+  RESET
+*/
+
+document.getElementById(
+  "resetBtn"
+).addEventListener(
+  "click",
+  resetDemo
+);
+
+
+
+/*
+  ACTION REQUIRED (HRDC section, locked stages)
+
+  One row per figure that differs from actual.
+  Hidden when nothing differs.
+*/
+
+function actionRequiredHTML(hrdc) {
+
+  const rows = [];
+
+  if (hrdc.pax !== hrdc.currentPax) {
+    rows.push(`
+      <tr>
+        <td class="diff"><div>Grant: ${hrdc.pax} pax</div><div>Claimable: ${hrdc.currentPax} pax</div></td>
+        <td>Update claimable amount manually later</td>
+      </tr>`);
+  }
+
+  const ordered = getState().cateringPax;
+  const actual = getActiveParticipants().length;
+
+  if (ordered !== actual) {
+    rows.push(`
+      <tr>
+        <td class="diff"><div>Ordered: ${ordered} pax</div><div>Actual: ${actual} pax</div></td>
+        <td>Update admin on catering pax</td>
+      </tr>`);
+  }
+
+  if (rows.length === 0) return "";
+
+  return `
+    <div class="action-required">
+      <strong>Action Required:</strong>
+      <table class="action-table">
+        <thead>
+          <tr><th>Difference</th><th>Action</th></tr>
+        </thead>
+        <tbody>${rows.join("")}</tbody>
+      </table>
+    </div>
+  `;
+
+}
+
+
+
+/*
+  LOCKED-STAGE REMINDER (Review Changes)
+
+  Too late to amend onwards. Shows a line only
+  where the locked figure differs from actual.
+*/
+
+function lockedReminderHTML() {
+
+  if (!isGrantFrozen()) return "";
+
+  const state = getState();
+
+  const grantPax = state.grant.pax;
+  const claimablePax = getHRDCClaimableParticipants().length;
+
+  const orderedPax = state.cateringPax;
+  const actualPax = getActiveParticipants().length;
+
+
+  const lines = [];
+
+  if (grantPax !== claimablePax) {
+    lines.push(`<div><strong>HRDC:</strong> Grant ${grantPax} pax, Claimable ${claimablePax} pax. Update the claimable amount and pax manually later</div>`);
+  }
+
+  if (orderedPax !== actualPax) {
+    lines.push(`<div><strong>Catering:</strong> Ordered ${orderedPax} pax, Actual ${actualPax} pax. Inform admin on changes</div>`);
+  }
+
+  if (lines.length === 0) return "";
+
+
+  return `
+    <div class="reminder-box">
+      <strong>Reminder:</strong>
+      ${lines.join("")}
+    </div>
+  `;
+
+}
+
+
+
+/*
+  GRANT AMENDMENT NOTE
+
+  Shown in Review Changes when the grant is
+  applied but still amendable.
+*/
+
+function amendNoteHTML(before, after) {
+
+  const changed =
+    before.pax !== after.pax
+    ||
+    before.amount !== after.amount;
+
+  return `
+    <div class="amend-note">
+
+      <strong>HRDC Grant — Before vs After</strong>
+
+      <div class="amend-grid">
+        <span></span>
+        <span class="amend-head">Before</span>
+        <span class="amend-head">After</span>
+
+        <span>Claimable Pax</span>
+        <span>${before.pax}</span>
+        <strong>${after.pax}</strong>
+
+        <span>Claimable Amount</span>
+        <span>${formatRM(before.amount)}</span>
+        <strong>${formatRM(after.amount)}</strong>
+      </div>
+
+      ${changed
+        ? `<div class="amend-reminder">⚠ Reminder: Amend the HRDC grant for all entities to reflect the revised claimable pax and amount.</div>`
+        : `<div class="amend-ok">No change to claimable pax or amount. Grant amendment not required.</div>`}
+
+    </div>
+  `;
+
+}
+
+
+
+/*
+  SUBMIT
+
+  1. Compares the current list with the last submitted list.
+  2. Writes an audit log entry.
+  3. Saves the current list as the new submitted list.
+     - Newly added pax become regular participants.
+     - Cancelled pax stay (greyed out, locked) so any
+       committed cost still flows to division spending.
+  4. Updates the grant figures if the grant is not yet
+     applied or is still amendable.
+  5. Refreshes the participant list and clears Review Changes.
+*/
+
+const stageLabels = {
+  pre: "Before grant applied",
+  amend: "Grant applied — amendable",
+  locked: "Grant applied — too late to amend",
+  claim: "Claim stage"
+};
+
+
+const costLabels = {
+  remain: "cost remains chargeable",
+  remove: "cost removed",
+  transfer: "cost transferred to replacement"
+};
+
+
+function seatLabel(type) {
+
+  return type === "free" ? "Free Seat" : "Chargeable";
+
+}
+
+
+function getChanges(before, after) {
+
+  const changes = [];
+
+  after.forEach(p => {
+
+    const prev = before.find(b => b.id === p.id);
+
+    if (!prev) {
+
+      if (p.status === "active") {
+        changes.push(`Added ${p.name} (${p.division}) — ${seatLabel(p.seatType)}`);
+      }
+
+      return;
+
+    }
+
+    if (prev.status === "cancelled" && p.status === "active") {
+      changes.push(`Reinstated ${p.name} (${p.division}) — ${seatLabel(p.seatType)}`);
+      return;
+    }
+
+    if (prev.status === "active" && p.status === "cancelled") {
+      changes.push(`Cancelled ${p.name} (${p.division}) — ${costLabels[p.costTreatment]}`);
+      return;
+    }
+
+    if (p.status === "active" && prev.seatType !== p.seatType) {
+      changes.push(`${p.name} (${p.division}): ${seatLabel(prev.seatType)} → ${seatLabel(p.seatType)}`);
+    }
+
+  });
+
+  return changes;
+
+}
+
+
+function formatDateTime(d) {
+
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  let h = d.getHours();
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+
+  const m = String(d.getMinutes()).padStart(2, "0");
+
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${h}:${m} ${ampm}`;
+
+}
+
+
+document.getElementById(
+  "submitBtn"
+).addEventListener(
+  "click",
+  function () {
+
+    const state = getState();
+
+    const stage = getStage();
+
+    const msg =
+      document.getElementById("submitMsg");
+
+
+    /*
+      Cancelled before grant applied / while amendable:
+      cost is removed entirely and stays removed
+      at every later stage.
+    */
+
+    if (stage === "pre" || stage === "amend") {
+
+      participants.forEach(p => {
+
+        if (p.status === "cancelled" && !p.submitted) {
+
+          p.costTreatment = "remove";
+
+        }
+
+      });
+
+    }
+
+
+    const changes =
+      getChanges(state.committed, participants);
+
+
+    if (changes.length === 0) {
+
+      msg.className = "submit-msg warn";
+      msg.textContent = "No changes to submit.";
+      msg.style.display = "block";
+      return;
+
+    }
+
+
+    const hrdcBefore = computeHRDC(state.committed);
+    const hrdcAfter = computeHRDC(participants);
+
+    const spendBefore = getSpending(state.committed).total;
+    const spendAfter = getSpending(participants).total;
+
+
+    const grantUpdated =
+      stage === "pre" || stage === "amend";
+
+    const amendRequired =
+      stage === "amend"
+      &&
+      (state.grant.pax !== hrdcAfter.pax || state.grant.amount !== hrdcAfter.amount);
+
+
+    state.log.unshift({
+      prev: {
+        committed: clone(state.committed),
+        grant: JSON.parse(JSON.stringify(state.grant)),
+        cateringPax: state.cateringPax
+      },
+      time: formatDateTime(new Date()),
+      stage: stageLabels[stage],
+      changes: changes,
+      paxBefore: hrdcBefore.pax,
+      paxAfter: hrdcAfter.pax,
+      amtBefore: hrdcBefore.amount,
+      amtAfter: hrdcAfter.amount,
+      spendBefore: spendBefore,
+      spendAfter: spendAfter,
+      note:
+        amendRequired
+          ? "Grant amendment required for all entities."
+          : (isGrantFrozen()
+              ? "Grant not amendable. Update claimable amount manually later."
+              : "")
+    });
+
+
+    /*
+      Save as the new submitted list.
+      Active first, cancelled at the bottom.
+    */
+
+    const committed =
+      clone(participants).map(p => ({
+        ...p,
+        isNew: false,
+        submitted: p.status === "cancelled",
+        hidden: p.status === "cancelled"
+      }));
+
+    committed.sort((a, b) =>
+      (a.status === "cancelled") - (b.status === "cancelled")
+    );
+
+    state.committed = committed;
+
+
+    if (grantUpdated) {
+
+      state.grant = computeHRDC(committed);
+
+      state.cateringPax =
+        committed.filter(p => p.status === "active").length;
+
+    }
+
+
+    saveState();
+
+
+    participants = clone(committed);
+
+    document.getElementById("summary").style.display = "none";
+
+    document.getElementById("addMessage").textContent = "";
+
+    render();
+
+
+    msg.className = "submit-msg";
+    msg.textContent =
+      "✓ Changes submitted for " + getTraining().name
+      + ". Participant list refreshed.";
+    msg.style.display = "block";
+
+  }
+);
+
+
+
+/*
+  If you switch to a locked stage with unsubmitted
+  additions, they become free seats too.
+*/
+
+function enforceFreeSeats() {
+
+  if (!isGrantFrozen()) return;
+
+  let changed = false;
+
+  participants.forEach(p => {
+
+    const added =
+      p.isNew || (p.submitted && p.status === "active");
+
+    if (added && p.status === "active" && p.seatType !== "free") {
+
+      p.seatType = "free";
+
+      changed = true;
+
+    }
+
+  });
+
+  if (changed) {
+
+    renderParticipants();
+
+    renderImpact();
+
+  }
+
+}
+
+
+
+/*
+  ADD PARTICIPANT OPTIONS
+
+  Employee pool + previously cancelled pax
+  (cancellation submitted), minus anyone
+  already showing in Manage Participants.
+*/
+
+function renderAddOptions() {
+
+  const select =
+    document.getElementById("newPerson");
+
+  const visibleNames =
+    participants.filter(p => !p.hidden).map(p => p.name);
+
+  const cancelled =
+    participants.filter(p => p.hidden);
+
+  const pool =
+    employeePool.filter(e =>
+      !visibleNames.includes(e.name)
+      &&
+      !cancelled.some(c => c.name === e.name)
+    );
+
+
+  let html = `<option value="">Select employee...</option>`;
+
+  if (cancelled.length > 0) {
+
+    html += `<optgroup label="Previously cancelled">` +
+      cancelled.map(c =>
+        `<option value="${c.name}|${c.division}">${c.name} — ${c.division}</option>`
+      ).join("") +
+    `</optgroup>`;
+
+  }
+
+  if (pool.length > 0) {
+
+    html += `<optgroup label="Employees">` +
+      pool.map(e =>
+        `<option value="${e.name}|${e.division}">${e.name} — ${e.division}</option>`
+      ).join("") +
+    `</optgroup>`;
+
+  }
+
+  select.innerHTML = html;
+
+}
+
+
+
+/*
+  CLEAR HISTORY
+
+  Removes this training's saved submissions and
+  audit log, and restores its original participant list.
+*/
+
+document.getElementById(
+  "clearHistoryBtn"
+).addEventListener(
+  "click",
+  function () {
+
+    const key =
+      document.getElementById("training").value;
+
+    if (!confirm(
+      "Clear all saved submissions and audit log for "
+      + getTraining().name
+      + "? This restores the original participant list."
+    )) return;
+
+    delete trainingState[key];
+
+    saveState();
+
+    resetDemo();
+
+  }
+);
+
+
+
+/*
+  UNDO (most recent submission only)
+
+  Restores the participant list, grant figures and
+  catering pax to what they were before that
+  submission. The entry stays in the audit log,
+  marked as undone.
+*/
+
+function undoLastSubmission() {
+
+  const state = getState();
+
+  const entry = state.log[0];
+
+  if (!entry || entry.undone || !entry.prev) return;
+
+
+  if (!confirm(
+    "Undo the submission made on " + entry.time
+    + "? Any unsubmitted changes will also be discarded."
+  )) return;
+
+
+  state.committed = clone(entry.prev.committed);
+
+  state.grant = entry.prev.grant;
+
+  state.cateringPax = entry.prev.cateringPax;
+
+  entry.undone = formatDateTime(new Date());
+
+  delete entry.prev;
+
+
+  saveState();
+
+  resetDemo();
+
+
+  const msg =
+    document.getElementById("submitMsg");
+
+  msg.className = "submit-msg warn";
+
+  msg.textContent =
+    "Last submission undone. Participant list restored.";
+
+  msg.style.display = "block";
+
+}
+
+
+
+/*
+  AUDIT LOG
+*/
+
+function renderAuditLog() {
+
+  const log = getState().log;
+
+  const body =
+    document.getElementById("auditBody");
+
+
+  if (log.length === 0) {
+
+    body.innerHTML =
+      `<tr><td colspan="7" class="audit-empty">No submissions yet.</td></tr>`;
+
+    return;
+
+  }
+
+
+  body.innerHTML = log.map((e, i) => `
+    <tr class="${e.undone ? "audit-undone" : ""}">
+      <td class="nowrap">${e.time}</td>
+      <td>${e.stage}</td>
+      <td>
+        <ul class="audit-changes">
+          ${e.changes.map(c => `<li>${c}</li>`).join("")}
+        </ul>
+        ${e.note && !e.undone ? `<div class="audit-note">${e.note}</div>` : ""}
+        ${e.undone ? `<div class="audit-undone-note">Undone on ${e.undone}</div>` : ""}
+      </td>
+      <td class="nowrap">${e.paxBefore} → <strong>${e.paxAfter}</strong></td>
+      <td class="nowrap">${formatRM(e.amtBefore)} → <strong>${formatRM(e.amtAfter)}</strong></td>
+      <td class="nowrap">${formatRM(e.spendBefore)} → <strong>${formatRM(e.spendAfter)}</strong></td>
+      <td class="nowrap">
+        ${i === 0 && !e.undone && e.prev
+          ? `<button class="btn btn-undo" onclick="undoLastSubmission()">Undo</button>`
+          : ""}
+      </td>
+    </tr>
+  `).join("");
+
+}
+
+
+
+/*
+  REVIEW CHANGES
+*/
+
+document.getElementById(
+  "reviewBtn"
+).addEventListener(
+  "click",
+  function () {
+
+    const actual =
+      getActiveParticipants().length;
+
+
+    const free =
+      getFreeSeats().length;
+
+
+    const hrdc =
+      getHRDC();
+
+
+    const claimable =
+      hrdc.pax;
+
+
+    const amount =
+      hrdc.amount;
+
+
+    const spending =
+      getDivisionSpending();
+
+
+    const cancelled =
+      participants.filter(
+        p => p.status === "cancelled" && !p.submitted
+      ).length;
+
+
+    const added =
+      participants.filter(
+        p => p.isNew
+        &&
+        p.status === "active"
+      ).length;
+
+
+    const summary =
+      document.getElementById(
+        "summary"
+      );
+
+
+    summary.innerHTML = `
+
+      <strong>Participant Change Preview</strong>
+
+      <br><br>
+
+      Active Participants:
+      <strong>${actual}</strong>
+
+      <br>
+
+      Participants Cancelled:
+      <strong>${cancelled}</strong>
+
+      <br>
+
+      Participants Added:
+      <strong>${added}</strong>
+
+      <br>
+
+      Free Seats:
+      <strong>${free}</strong>
+
+      <br><br>
+
+      Attendance / Evaluations:
+      <strong>${actual} pax</strong>
+
+      <br>
+
+      Catering:
+      <strong>${isGrantFrozen() ? getState().cateringPax + " pax (locked)" : actual + " pax"}</strong>
+
+      <br>
+
+      HRDC Claimable:
+      <strong>${claimable} pax</strong>
+
+      <br>
+
+      HRDC Amount Claimable:
+      <strong>
+        ${formatRM(amount)}
+      </strong>
+
+      ${lockedReminderHTML()}
+
+      ${getStage() === "amend"
+        ? amendNoteHTML(getOriginalHRDC(), hrdc)
+        : ""}
+
+      <br><br>
+
+      Division Spending:
+      <strong>
+        ${formatRM(spending)}
+      </strong>
+
+    `;
+
+
+    summary.style.display =
+      "block";
+
+  }
+);
+
+
+
+syncNextId();
+
+resetDemo();
+
+</script>
+
+</body>
+</html>
