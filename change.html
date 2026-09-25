@@ -393,14 +393,40 @@ select:disabled {
 
 .bd-row {
   display: grid;
-  grid-template-columns: 60px 60px 1fr;
+  grid-template-columns: 60px max-content 1fr;
   gap: 10px;
   font-size: 12px;
   padding: 3px 0;
 }
 
+.arrow,
+.bd-row .arrow {
+  display: inline-block;
+  width: 14px;
+  text-align: right;
+}
+
 .bd-row .amt {
   text-align: right;
+  font-weight: 700;
+}
+
+/* Decreases: whole row green, amount bold */
+#divisionSpending.down,
+.bd-row.down span {
+  color: #16a34a;
+}
+
+#spendingBreakdown .bd-row.down .amt {
+  font-weight: 700;
+}
+
+/* Division Spending: black amounts unbolded, red (increased) stay bold */
+#spendingBreakdown .bd-row .amt {
+  font-weight: 400;
+}
+
+#spendingBreakdown .bd-row.up .amt {
   font-weight: 700;
 }
 
@@ -556,6 +582,66 @@ select:disabled {
   border-bottom: 0;
 }
 
+#divisionSpending.up,
+.bd-row.up span:not(:first-child) {
+  color: #dc2626;
+}
+
+.balance-invoice {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 12px;
+}
+
+.bi-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 400;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.bi-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+
+.bi-row span:last-child {
+  text-align: right;
+  font-weight: 400;
+  padding-right: 14px; /* lines up with breakdown amounts */
+}
+
+.bi-total-amt.unchanged {
+  color: inherit;
+}
+
+.bi-total-amt {
+  color: #dc2626;
+  padding-right: 14px; /* same position as Division Spending total */
+}
+
+.bi-add {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.bi-add span:last-child,
+.bi-total span:last-child {
+  font-weight: 700;
+}
+
+.bi-total {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid #1f2937;
+  font-weight: 700;
+}
+
 .reminder-box {
   margin-top: 12px;
   padding: 10px 12px;
@@ -686,9 +772,6 @@ select:disabled {
           Grant applied — too late to amend
         </option>
 
-        <option value="claim">
-          Claim stage
-        </option>
       </select>
     </div>
 
@@ -956,6 +1039,8 @@ select:disabled {
         </div>
 
         <div id="spendingBreakdown"></div>
+
+        <div id="balanceInvoice"></div>
 
       </div>
 
@@ -1239,6 +1324,7 @@ function getState() {
         byDivision: groupByDivision(claimable, perPax)
       },
       cateringPax: committed.length,
+      grantIds: claimable.map(p => p.id),
       log: []
     };
 
@@ -1249,6 +1335,25 @@ function getState() {
     Older saved data without a catering figure:
     use the submitted active pax.
   */
+
+  /*
+    Older saved data without grant IDs:
+    use submitted active, chargeable, non-EBI pax.
+  */
+
+  if (trainingState[key].grantIds === undefined) {
+
+    trainingState[key].grantIds =
+      trainingState[key].committed
+        .filter(p =>
+          p.status === "active"
+          && p.seatType === "chargeable"
+          && !isNonClaimableEntity(p)
+        )
+        .map(p => p.id);
+
+  }
+
 
   if (trainingState[key].cateringPax === undefined) {
 
@@ -1276,6 +1381,21 @@ function getTraining() {
 function getStage() {
 
   return document.getElementById("stage").value;
+
+}
+
+
+
+/*
+  Additional pax = free seat automatically.
+  Group pricing only, too late to amend onwards.
+*/
+
+function isFreeSeatOnly() {
+
+  const training = getTraining();
+
+  return isGrantFrozen() && training && training.pricing === "group";
 
 }
 
@@ -1478,18 +1598,10 @@ function getHRDC() {
   const claimable = getHRDCClaimableParticipants();
 
 
-  if (training.pricing === "perpax") {
-
-    return {
-      pax: claimable.length,
-      amount: claimable.length * training.ratePerPax,
-      perPax: training.ratePerPax,
-      frozen: false,
-      byDivision: groupByDivision(claimable, training.ratePerPax)
-    };
-
-  }
-
+  /*
+    Too late to amend onwards (group and per pax):
+    grant figures locked in.
+  */
 
   if (isGrantFrozen()) {
 
@@ -1499,6 +1611,19 @@ function getHRDC() {
       ...grant,
       frozen: true,
       currentPax: claimable.length
+    };
+
+  }
+
+
+  if (training.pricing === "perpax") {
+
+    return {
+      pax: claimable.length,
+      amount: claimable.length * training.ratePerPax,
+      perPax: training.ratePerPax,
+      frozen: false,
+      byDivision: groupByDivision(claimable, training.ratePerPax)
     };
 
   }
@@ -1618,18 +1743,62 @@ function getDivisionSpending() {
 
 
 
-function breakdownHTML(rows) {
+/*
+  baseline (optional): previous rows to compare against.
+  Divisions whose amount went up are shown in red with ↑.
+*/
+
+function breakdownHTML(rows, baseline) {
+
+  /*
+    Divisions that dropped to 0 pax still show,
+    so the decrease is visible.
+  */
+
+  if (baseline) {
+
+    baseline.forEach(b => {
+
+      if (!rows.find(r => r.division === b.division)) {
+        rows = rows.concat([{ division: b.division, pax: 0, amount: 0 }]);
+      }
+
+    });
+
+  }
 
   if (rows.length === 0) return "";
 
   return `<div class="breakdown">` +
-    rows.map(r => `
-      <div class="bd-row">
-        <span>${r.division}</span>
-        <span>${r.pax} pax</span>
-        <span class="amt">${formatRM(r.amount)}</span>
-      </div>
-    `).join("") +
+    rows.map(r => {
+
+      const prev =
+        baseline ? baseline.find(b => b.division === r.division) : null;
+
+      const prevPax = prev ? prev.pax : 0;
+      const prevAmt = prev ? prev.amount : 0;
+
+      const up =
+        baseline && r.amount > prevAmt;
+
+      const down =
+        baseline && r.amount < prevAmt;
+
+      const paxDiff = Math.abs(r.pax - prevPax);
+      const amtDiff = Math.abs(r.amount - prevAmt);
+
+      const sign = up ? "+" : "-";
+      const arrow = up ? "↑" : (down ? "↓" : "");
+
+      return `
+        <div class="bd-row${up ? " up" : ""}${down ? " down" : ""}">
+          <span>${r.division}</span>
+          <span>${r.pax} pax${up || down ? ` ${arrow}${paxDiff ? ` (${sign} ${paxDiff} pax)` : ""}` : ""}</span>
+          <span class="amt">${up || down ? `(${sign} ${formatRM(amtDiff)}) ` : ""}${formatRM(r.amount)}${baseline ? `<span class="arrow">${arrow}</span>` : ""}</span>
+        </div>
+      `;
+
+    }).join("") +
   `</div>`;
 
 }
@@ -1753,7 +1922,7 @@ function renderParticipants() {
     */
 
     const addedWhileLocked =
-      isGrantFrozen()
+      isFreeSeatOnly()
       &&
       (participant.isNew || (participant.submitted && participant.status === "active"));
 
@@ -1907,9 +2076,6 @@ function renderCancellationOptions() {
         Remove participant cost
       </option>
 
-      <option value="transfer">
-        Transfer cost to replacement
-      </option>
 
     `;
 
@@ -2251,7 +2417,7 @@ function renderImpact() {
     "stageInfo"
   ).textContent =
     hrdc.frozen
-      ? "Grant has already been applied and is too late to amend. Group pricing: HRDC figures stay as per the original grant and must be updated manually later."
+      ? "Grant has already been applied and is too late to amend. HRDC figures stay as per the grant and must be updated manually later."
       : stageMessages[stage];
 
 
@@ -2322,17 +2488,119 @@ function renderImpact() {
 
 
 
-  document.getElementById(
-    "divisionSpending"
-  ).textContent =
+  /*
+    Too late to amend onwards: compare with last
+    submission and highlight increases in red.
+  */
 
-    formatRM(spending);
+  const spendBaseline =
+    isGrantFrozen()
+      ? getSpending(getState().committed)
+      : null;
+
+  const spendUp =
+    spendBaseline && spending > spendBaseline.total;
+
+  const spendEl =
+    document.getElementById("divisionSpending");
+
+  const spendDown =
+    spendBaseline && spending < spendBaseline.total;
+
+  spendEl.innerHTML =
+    formatRM(spending)
+    + (spendBaseline
+        ? `<span class="arrow">${spendUp ? "↑" : (spendDown ? "↓" : "")}</span>`
+        : "");
+
+  spendEl.classList.toggle("up", !!spendUp);
+
+  spendEl.classList.toggle("down", !!spendDown);
 
 
   document.getElementById(
     "spendingBreakdown"
   ).innerHTML =
-    breakdownHTML(spendingData.byDivision);
+    breakdownHTML(
+      spendingData.byDivision,
+      spendBaseline ? spendBaseline.byDivision : null
+    );
+
+
+  /*
+    BALANCE INVOICE (pax added, too late to amend onwards)
+  */
+
+  /*
+    Per pax, too late to amend onwards:
+    HRDC claim reduced below the locked grant.
+  */
+
+  const reduction = getClaimReduction();
+
+  const claimReducedBy = reduction.balance;
+
+  const reducedDivText = reduction.divText;
+
+
+  const additionalBalance =
+    spendUp ? spending - spendBaseline.total : 0;
+
+  /*
+    Also shown (unchanged, in black) when pax was reduced
+    but the participant cost was removed.
+  */
+
+  const showBalance =
+    additionalBalance > 0 || reduction.reduced;
+
+  const balanceChanged =
+    additionalBalance > 0 || claimReducedBy > 0;
+
+  /*
+    Original invoice = division spending (last submission)
+    minus the HRDC claim (locked grant).
+  */
+
+  const baseSpend =
+    spendBaseline ? spendBaseline.total : spending;
+
+  const originalInvoice =
+    training.pricing === "perpax" && isGrantFrozen()
+      ? Math.max(
+          0,
+          baseSpend
+          - hrdcPaidPax(getState().committed).reduce((t, r) => t + r.pax, 0) * training.ratePerPax
+        )
+      : Math.max(0, baseSpend - getState().grant.amount);
+
+
+  document.getElementById(
+    "balanceInvoice"
+  ).innerHTML =
+    showBalance
+      ? `
+        <div class="balance-invoice">
+          <div class="bi-title">
+            <span>Balance Invoice</span>
+            <strong class="bi-total-amt${balanceChanged ? "" : " unchanged"}">${formatRM(originalInvoice + additionalBalance + claimReducedBy)}</strong>
+          </div>
+          <div class="bi-row">
+            <span>Original invoice amount</span>
+            <span>${formatRM(originalInvoice)}</span>
+          </div>
+          ${additionalBalance > 0 ? `
+          <div class="bi-row bi-add">
+            <span>+ Additional balance</span>
+            <span>${formatRM(additionalBalance)}</span>
+          </div>` : ""}
+          ${claimReducedBy > 0 ? `
+          <div class="bi-row bi-add">
+            <span>+ HRDC claim reduced${reducedDivText ? ` (${reducedDivText})` : ""}</span>
+            <span>${formatRM(claimReducedBy)}</span>
+          </div>` : ""}
+        </div>`
+      : "";
 
 
 
@@ -2455,7 +2723,7 @@ function render() {
   const seatSelect =
     document.getElementById("newSeat");
 
-  if (isGrantFrozen()) {
+  if (isFreeSeatOnly()) {
 
     seatSelect.value = "free";
 
@@ -2465,12 +2733,24 @@ function render() {
 
   else {
 
+    /*
+      Coming out of a forced free-seat state
+      (e.g. switching from a group training):
+      go back to the default, Chargeable.
+    */
+
+    if (seatSelect.disabled) {
+
+      seatSelect.value = "chargeable";
+
+    }
+
     seatSelect.disabled = false;
 
   }
 
   document.getElementById("freeSeatHint").style.display =
-    isGrantFrozen() ? "block" : "none";
+    isFreeSeatOnly() ? "block" : "none";
 
   enforceFreeSeats();
 
@@ -2501,7 +2781,7 @@ document.getElementById(
 
 
     const seatType =
-      isGrantFrozen()
+      isFreeSeatOnly()
         ? "free"
         : document.getElementById(
             "newSeat"
@@ -2700,6 +2980,96 @@ document.getElementById(
 
 
 /*
+  HRDC PAID (per pax, too late to amend onwards)
+
+  HRDC only pays for pax named in the locked grant
+  who are still attending on a chargeable seat.
+  Pax added after the lock are not claimable.
+*/
+
+function hrdcPaidPax(list) {
+
+  const ids = getState().grantIds || [];
+
+  const paid = list.filter(p =>
+    ids.includes(p.id)
+    && p.status === "active"
+    && p.seatType === "chargeable"
+    && !isNonClaimableEntity(p)
+  );
+
+  return groupByDivision(paid, 0);
+
+}
+
+
+
+/*
+  HRDC CLAIM REDUCTION (per pax, too late to amend onwards)
+
+  Compared with the last submission, per division:
+    claim lost   = grant pax no longer attending
+    cost removed = drop in chargeable pax ("Remove participant cost")
+  Balance invoice only for claim lost that still carries a cost.
+*/
+
+function getClaimReduction() {
+
+  const training = getTraining();
+
+  const empty = { reduced: false, balance: 0, divText: "" };
+
+  if (!isGrantFrozen() || training.pricing !== "perpax") return empty;
+
+
+  const committed = getState().committed;
+
+  const paidBefore = hrdcPaidPax(committed);
+  const paidNow = hrdcPaidPax(participants);
+
+  const spendBefore = groupByDivision(getSpendingParticipants(committed), 0);
+  const spendNow = groupByDivision(getSpendingParticipants(participants), 0);
+
+  const paxOf = (rows, d) => {
+    const r = rows.find(x => x.division === d);
+    return r ? r.pax : 0;
+  };
+
+
+  let reducedPax = 0;
+  let billablePax = 0;
+  const parts = [];
+
+  paidBefore.forEach(g => {
+
+    const lost =
+      Math.max(0, g.pax - paxOf(paidNow, g.division));
+
+    const costRemoved =
+      Math.max(0, paxOf(spendBefore, g.division) - paxOf(spendNow, g.division));
+
+    const billable =
+      Math.max(0, lost - costRemoved);
+
+    reducedPax += lost;
+    billablePax += billable;
+
+    if (billable > 0) parts.push(`${g.division} - ${billable} pax`);
+
+  });
+
+
+  return {
+    reduced: reducedPax > 0,
+    balance: billablePax * training.ratePerPax,
+    divText: parts.join(", ")
+  };
+
+}
+
+
+
+/*
   ACTION REQUIRED (HRDC section, locked stages)
 
   One row per figure that differs from actual.
@@ -2710,7 +3080,20 @@ function actionRequiredHTML(hrdc) {
 
   const rows = [];
 
-  if (hrdc.pax !== hrdc.currentPax) {
+  const perPaxIncrease =
+    getTraining().pricing === "perpax"
+    &&
+    hrdc.currentPax > hrdc.pax;
+
+  if (perPaxIncrease) {
+    rows.push(`
+      <tr>
+        <td class="diff"><div>Grant: ${hrdc.pax} pax</div><div>Actual: ${hrdc.currentPax} pax</div></td>
+        <td>Make a normal payment for the balance.</td>
+      </tr>`);
+  }
+
+  else if (hrdc.pax !== hrdc.currentPax) {
     rows.push(`
       <tr>
         <td class="diff"><div>Grant: ${hrdc.pax} pax</div><div>Claimable: ${hrdc.currentPax} pax</div></td>
@@ -2769,12 +3152,20 @@ function lockedReminderHTML() {
 
   const lines = [];
 
-  if (grantPax !== claimablePax) {
+  if (getTraining().pricing === "perpax" && claimablePax > grantPax) {
+    lines.push(`<div><strong>HRDC:</strong> +${claimablePax - grantPax} pax not claimable. Make a normal payment for the balance.</div>`);
+  }
+
+  else if (grantPax !== claimablePax) {
     lines.push(`<div><strong>HRDC:</strong> Grant ${grantPax} pax, Claimable ${claimablePax} pax. Update the claimable amount and pax manually later</div>`);
   }
 
   if (orderedPax !== actualPax) {
-    lines.push(`<div><strong>Catering:</strong> Ordered ${orderedPax} pax, Actual ${actualPax} pax. Inform admin on changes</div>`);
+    lines.push(
+      actualPax > orderedPax
+        ? `<div><strong>Catering:</strong> +${actualPax - orderedPax} pax. Inform admin on changes</div>`
+        : `<div><strong>Catering:</strong> Ordered ${orderedPax} pax, Actual ${actualPax} pax. Inform admin on changes</div>`
+    );
   }
 
   if (lines.length === 0) return "";
@@ -2960,6 +3351,21 @@ document.getElementById(
     }
 
 
+    /*
+      Remember the stage each new cancellation was submitted at.
+    */
+
+    participants.forEach(p => {
+
+      if (p.status === "cancelled" && !p.submitted) {
+
+        p.cancelledStage = stage;
+
+      }
+
+    });
+
+
     const changes =
       getChanges(state.committed, participants);
 
@@ -2994,7 +3400,8 @@ document.getElementById(
       prev: {
         committed: clone(state.committed),
         grant: JSON.parse(JSON.stringify(state.grant)),
-        cateringPax: state.cateringPax
+        cateringPax: state.cateringPax,
+        grantIds: (state.grantIds || []).slice()
       },
       time: formatDateTime(new Date()),
       stage: stageLabels[stage],
@@ -3038,6 +3445,15 @@ document.getElementById(
 
       state.grant = computeHRDC(committed);
 
+      state.grantIds =
+        committed
+          .filter(p =>
+            p.status === "active"
+            && p.seatType === "chargeable"
+            && !isNonClaimableEntity(p)
+          )
+          .map(p => p.id);
+
       state.cateringPax =
         committed.filter(p => p.status === "active").length;
 
@@ -3074,7 +3490,7 @@ document.getElementById(
 
 function enforceFreeSeats() {
 
-  if (!isGrantFrozen()) return;
+  if (!isFreeSeatOnly()) return;
 
   let changed = false;
 
@@ -3223,6 +3639,8 @@ function undoLastSubmission() {
 
   state.cateringPax = entry.prev.cateringPax;
 
+  if (entry.prev.grantIds) state.grantIds = entry.prev.grantIds;
+
   entry.undone = formatDateTime(new Date());
 
   delete entry.prev;
@@ -3343,6 +3761,34 @@ document.getElementById(
       ).length;
 
 
+    /*
+      Per pax, too late to amend onwards, pax reduced:
+      claimable drops below the locked grant.
+      The difference becomes a balance invoice.
+    */
+
+    const training = getTraining();
+
+    const actualClaimAmount =
+      training.pricing === "perpax"
+        ? getHRDCClaimableParticipants().length * training.ratePerPax
+        : 0;
+
+    const claimReduction =
+      getClaimReduction().balance;
+
+
+    /*
+      Too late to amend onwards: change in active pax
+      since the last submission.
+    */
+
+    const attendanceDelta =
+      actual
+      -
+      getState().committed.filter(p => p.status === "active").length;
+
+
     const summary =
       document.getElementById(
         "summary"
@@ -3375,25 +3821,35 @@ document.getElementById(
 
       <br><br>
 
-      Attendance / Evaluations:
-      <strong>${actual} pax</strong>
+      ${isGrantFrozen()
+        ? `
+          Attendance / Evaluations:
+          <strong>${attendanceDelta === 0 ? "No change" : (attendanceDelta > 0 ? "+" : "") + attendanceDelta}</strong>
 
-      <br>
+          <br>
 
-      Catering:
-      <strong>${isGrantFrozen() ? getState().cateringPax + " pax (locked)" : actual + " pax"}</strong>
+          Catering &amp; HRDC:
+          <strong>Locked</strong>
+        `
+        : `
+          Attendance / Evaluations:
+          <strong>${actual} pax</strong>
 
-      <br>
+          <br>
 
-      HRDC Claimable:
-      <strong>${claimable} pax</strong>
+          Catering:
+          <strong>${actual} pax</strong>
 
-      <br>
+          <br>
 
-      HRDC Amount Claimable:
-      <strong>
-        ${formatRM(amount)}
-      </strong>
+          HRDC Claimable:
+          <strong>${claimable} pax</strong>
+
+          <br>
+
+          HRDC Amount Claimable:
+          <strong>${formatRM(amount)}</strong>
+        `}
 
       ${lockedReminderHTML()}
 
@@ -3405,8 +3861,24 @@ document.getElementById(
 
       Division Spending:
       <strong>
-        ${formatRM(spending)}
+        ${formatRM(spending)}${
+          isGrantFrozen() && spending > getSpending(getState().committed).total
+            ? ` <span style="color:#dc2626;">(increased)</span>`
+            : (isGrantFrozen() && spending === getSpending(getState().committed).total
+                ? " (unchanged)"
+                : (isGrantFrozen() && spending < getSpending(getState().committed).total
+                    ? " (decreased)"
+                    : ""))
+        }
       </strong>
+
+      ${isGrantFrozen() && spending > getSpending(getState().committed).total
+        ? `<br>Balance Invoice: <strong style="color:#dc2626;">+ ${formatRM(spending - getSpending(getState().committed).total)}</strong>`
+        : (claimReduction > 0
+            ? `<br>Balance Invoice: <strong style="color:#dc2626;">+ ${formatRM(claimReduction)}</strong> <strong style="color:#dc2626;">(HRDC claim reduced)</strong>`
+            : (getClaimReduction().reduced
+                ? `<br>Balance Invoice: <strong>Unchanged</strong>`
+                : ""))}
 
     `;
 
