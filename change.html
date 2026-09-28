@@ -3723,6 +3723,27 @@ document.getElementById(
   "click",
   function () {
 
+    /*
+      Nothing changed since the last submission:
+      show a simple "No changes" preview (all stages).
+    */
+
+    if (getChanges(getState().committed, participants).length === 0) {
+
+      const summaryEl = document.getElementById("summary");
+
+      summaryEl.innerHTML = `
+        <strong>Participant Change Preview</strong>
+        <br><br>
+        No changes.
+      `;
+
+      summaryEl.style.display = "block";
+
+      return;
+
+    }
+
     const actual =
       getActiveParticipants().length;
 
