@@ -11305,6 +11305,72 @@ function escapeXmlText(value){
 }
 
 
+/*
+  Participants (and so "BIL. PELATIH" and cost) counted in the
+  Cost Breakdown letter, per training:
+
+  Group pricing
+    - Before grant applied / grant amendable: the current list.
+    - Too late to amend onwards: held as it was when the grant
+      was locked. Later additions and cancellations don't change it.
+
+  Per-pax pricing
+    - No letter is needed (the Documents tab shows a remark
+      instead), so the current list is simply passed through.
+*/
+
+function resolveCostBreakdownLetterRecords(sessionRecords){
+
+    const codes =
+        Array.from(
+            new Set(
+                sessionRecords.map(
+                    record =>
+                        record.code
+                )
+            )
+        );
+
+    let letterRecords = [];
+
+    codes.forEach(
+        code => {
+
+            const current =
+                sessionRecords.filter(
+                    record =>
+                        record.code === code
+                );
+
+
+            /* Group pricing, grant locked: held list */
+
+            const heldRecords =
+                typeof window.getChangesFrozenCostRecords === "function"
+                ? window.getChangesFrozenCostRecords(code)
+                : null;
+
+            if(heldRecords){
+
+                letterRecords =
+                    letterRecords.concat(heldRecords);
+
+                return;
+
+            }
+
+
+            letterRecords =
+                letterRecords.concat(current);
+
+        }
+    );
+
+    return letterRecords;
+
+}
+
+
 function computeCostBreakdownData(session){
 
     const companyMap =
@@ -11314,7 +11380,35 @@ function computeCostBreakdownData(session){
     const excludedNonRm = [];
 
 
+    /*
+      Which participants the letter counts depends on what was
+      submitted in the Changes tab -- see
+      resolveCostBreakdownLetterRecords() below.
+    */
+
+    const sessionRecords = [];
+
     session.divisionGroups.forEach(
+        group => {
+
+            group.records.forEach(
+                record => {
+
+                    sessionRecords.push(record);
+
+                }
+            );
+
+        }
+    );
+
+
+    [
+        {
+            records:
+                resolveCostBreakdownLetterRecords(sessionRecords)
+        }
+    ].forEach(
         group => {
 
             group.records.forEach(
@@ -12163,6 +12257,20 @@ function renderRequisitionList(){
                     .join("");
 
 
+                /*
+                  The Cost Breakdown letter is only for group-priced
+                  trainings. Per-pax trainings show a remark instead.
+                */
+
+                const isGroupPriced =
+                    session.divisionGroups.some(
+                        group =>
+                            group.records.some(
+                                record =>
+                                    record.priceType === "group"
+                            )
+                    );
+
                 return `
 
                     <tr>
@@ -12186,6 +12294,12 @@ function renderRequisitionList(){
 
                     <td>
 
+                    ${
+                        !isGroupPriced
+
+                        ? `<span class="hint" style="margin:0;">No letter needed. Apply as public training.</span>`
+
+                        : `
                     <button
                         type="button"
                         class="secondary"
@@ -12203,6 +12317,9 @@ function renderRequisitionList(){
                     >
                     Download
                     </button>
+
+`
+                    }
 
                     </td>
 
