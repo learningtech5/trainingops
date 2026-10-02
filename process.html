@@ -11321,13 +11321,19 @@ function computeCostBreakdownData(session){
                 record => {
 
 
-                    const isRm =
+                    /*
+                      The letter is in RM. A foreign-currency training
+                      is converted with its exchange rate (Tracking >
+                      Settings); one with no rate yet is left out.
+                    */
 
-                        !record.currency ||
-                        clean(record.currency).toUpperCase() === "RM";
+                    const rmRate =
+                        isForeignCurrency(record.currency)
+                        ? getRecordExchangeRate(record)
+                        : 1;
 
 
-                    if(!isRm){
+                    if(rmRate === null){
 
                         excludedNonRm.push(
                             record
@@ -11375,10 +11381,20 @@ function computeCostBreakdownData(session){
 
 
                     entry.cost +=
-                        Number(record.price || 0);
+                        Number(record.price || 0) * rmRate;
 
                 }
             );
+
+        }
+    );
+
+
+    companyMap.forEach(
+        entry => {
+
+            entry.cost =
+                Math.round(entry.cost * 100) / 100;
 
         }
     );
@@ -11575,7 +11591,7 @@ async function buildCostBreakdownDocxForSession(session){
     ){
 
         throw new Error(
-            "No RM-priced records found for this training session."
+            "No RM amounts for this training session. For a foreign-currency training, set its exchange rate in Tracking > Settings first."
         );
 
     }
@@ -12006,7 +12022,7 @@ function showCostBreakdownPreviewForSession(sessionKey){
     if(!companies.length){
 
         setStatus(
-            "No RM-priced records found for this training session.",
+            "No RM amounts for this training session. For a foreign-currency training, set its exchange rate in Tracking > Settings first.",
             true
         );
 
