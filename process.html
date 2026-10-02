@@ -2910,6 +2910,7 @@ Add Training
 <th>No. of Days</th>
 <th>Training Dates</th>
 <th>Training Provider / Internal Trainer</th>
+<th>Foreign $</th>
 <th>Price</th>
 <th>HRDF Claimable</th>
 <th>HRDF Claim Amount</th>
@@ -8064,6 +8065,7 @@ Copy Cell Contents
 <th>No. of Days</th>
 <th>Training Dates</th>
 <th>Training Provider / Internal Trainer</th>
+<th>Foreign $</th>
 <th>Price</th>
 <th>HRDF Claimable</th>
 <th>HRDF Claim Amount</th>
@@ -13241,6 +13243,62 @@ function formatPriceDisplayForTrainingSummary(record){
 
 }
 
+
+
+/*
+  Training Records tables: "Foreign $" shows a foreign-currency
+  training's price in its own currency, and "Price" shows the RM
+  value (converted with the training's exchange rate from
+  Tracking > Settings). RM trainings leave "Foreign $" blank.
+*/
+
+function formatForeignPriceForTrainingRecords(record){
+
+    return isForeignCurrency(record.currency)
+        ? formatPriceDisplayForTrainingSummary(record)
+        : "";
+
+}
+
+
+function formatRmPriceForTrainingRecords(record){
+
+    if(!isForeignCurrency(record.currency)){
+
+        return formatPriceDisplayForTrainingSummary(record);
+
+    }
+
+    const rate =
+        getRecordExchangeRate(record);
+
+    if(rate === null){
+
+        return "No rate set";
+
+    }
+
+    const isGroup =
+        record.priceType === "group" &&
+        record.groupPrice !== undefined &&
+        record.groupPrice !== null &&
+        record.groupPrice !== "";
+
+    const rmDisplay =
+        formatPriceDisplay(
+            Number(isGroup ? record.groupPrice : record.price) * rate,
+            "RM"
+        );
+
+    if(!rmDisplay){
+
+        return "";
+
+    }
+
+    return rmDisplay + (isGroup ? "/group" : "/pax");
+
+}
 
 
 function formatPriceTypeLabel(priceType){
@@ -19212,10 +19270,21 @@ function renderAllInfoDetails(code){
                 record.priceType === "group"
                 ? (
                     recordIndex === 0
-                    ? `<td class="trackingClaimAmountCell" rowspan="${trainingRecordsGroup.length}">${escapeHtml(formatPriceDisplayForTrainingSummary(record))}</td>`
+                    ? `<td class="trackingClaimAmountCell" rowspan="${trainingRecordsGroup.length}">${escapeHtml(formatForeignPriceForTrainingRecords(record))}</td>`
                     : ""
                 )
-                : `<td>${escapeHtml(formatPriceDisplayForRecordWithSuffix(record))}</td>`
+                : `<td>${escapeHtml(formatForeignPriceForTrainingRecords(record))}</td>`
+            }
+
+
+            ${
+                record.priceType === "group"
+                ? (
+                    recordIndex === 0
+                    ? `<td class="trackingClaimAmountCell" rowspan="${trainingRecordsGroup.length}">${escapeHtml(formatRmPriceForTrainingRecords(record))}</td>`
+                    : ""
+                )
+                : `<td>${escapeHtml(formatRmPriceForTrainingRecords(record))}</td>`
             }
 
 
@@ -24757,7 +24826,7 @@ function renderRecords(){
 
         <tr>
 
-        <td colspan="22">
+        <td colspan="23">
         No training records created.
         </td>
 
@@ -24794,7 +24863,7 @@ function renderRecords(){
 
         tbody.innerHTML = `
         <tr>
-        <td colspan="22">
+        <td colspan="23">
         No training records created.
         </td>
         </tr>
@@ -24987,10 +25056,21 @@ function renderRecords(){
                 record.priceType === "group"
                 ? (
                     claimAmountRowspan[index] !== undefined
-                    ? `<td class="trackingClaimAmountCell" rowspan="${claimAmountRowspan[index]}">${escapeHtml(formatPriceDisplayForTrainingSummary(record))}</td>`
+                    ? `<td class="trackingClaimAmountCell" rowspan="${claimAmountRowspan[index]}">${escapeHtml(formatForeignPriceForTrainingRecords(record))}</td>`
                     : ""
                 )
-                : `<td>${escapeHtml(formatPriceDisplayForRecordWithSuffix(record))}</td>`
+                : `<td>${escapeHtml(formatForeignPriceForTrainingRecords(record))}</td>`
+            }
+
+
+            ${
+                record.priceType === "group"
+                ? (
+                    claimAmountRowspan[index] !== undefined
+                    ? `<td class="trackingClaimAmountCell" rowspan="${claimAmountRowspan[index]}">${escapeHtml(formatRmPriceForTrainingRecords(record))}</td>`
+                    : ""
+                )
+                : `<td>${escapeHtml(formatRmPriceForTrainingRecords(record))}</td>`
             }
 
 
