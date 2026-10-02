@@ -9321,12 +9321,13 @@ function resolveGradeCode(record){
 
 /*
   Standard entity order used wherever entities are listed
-  (HRDC Claims, Balance Payments, Cost Breakdown Pivot):
-  HEB, HKS, HDH, MGK first, then any other entity A-Z.
+  (checklist, HRDC Claims, Balance Payments, Cost Breakdown
+  Pivot, Summary, Tracking): HEB, EBI, HKS, HDH, MGK first,
+  then any other entity A-Z.
 */
 
 const ENTITY_SEQUENCE =
-    ["HEB", "HKS", "HDH", "MGK"];
+    ["HEB", "EBI", "HKS", "HDH", "MGK"];
 
 
 function compareEntitySequence(a, b){
@@ -13763,9 +13764,7 @@ function buildChecklistDetailsCell(item, entry, group, disabledAttr, participant
                     )
                 )
             )
-            .sort(
-                (a, b) => clean(a).localeCompare(clean(b))
-            );
+            .sort(compareEntitySequence);
 
 
         if(!divisionsPresent.length){
@@ -13817,9 +13816,7 @@ function buildChecklistDetailsCell(item, entry, group, disabledAttr, participant
                     )
                 )
             )
-            .sort(
-                (a, b) => clean(a).localeCompare(clean(b))
-            );
+            .sort(compareEntitySequence);
 
 
         if(!companiesPresent.length){
@@ -13904,9 +13901,7 @@ function buildChecklistDetailsCell(item, entry, group, disabledAttr, participant
                     )
                 )
             )
-            .sort(
-                (a, b) => clean(a).localeCompare(clean(b))
-            );
+            .sort(compareEntitySequence);
 
 
         if(!companiesPresent.length){
@@ -13984,9 +13979,7 @@ function buildChecklistDetailsCell(item, entry, group, disabledAttr, participant
                     )
                 )
             )
-            .sort(
-                (a, b) => clean(a).localeCompare(clean(b))
-            );
+            .sort(compareEntitySequence);
 
         const trainingHasHrdfClaimableParticipant =
             group.some(
@@ -14069,9 +14062,7 @@ function buildChecklistDetailsCell(item, entry, group, disabledAttr, participant
                     )
                 )
             )
-            .sort(
-                (a, b) => clean(a).localeCompare(clean(b))
-            );
+            .sort(compareEntitySequence);
 
 
         if(!companiesPresent.length){
@@ -14496,7 +14487,8 @@ function getCompaniesPresentForCode(code){
                     resolveCompanyCode(record) || "Other"
             )
         )
-    );
+    )
+    .sort(compareEntitySequence);
 
 }
 
@@ -14515,7 +14507,8 @@ function getHrdfClaimableCompaniesForCode(code){
                     resolveCompanyCode(record) || "Other"
             )
         )
-    );
+    )
+    .sort(compareEntitySequence);
 
 }
 
@@ -18579,11 +18572,11 @@ function renderAllInfoDetails(code){
 
 
     // Always show the full set of entities, in the standard entity
-    // sequence (HEB, HKS, HDH, MGK, then EBI), even when a given entity
+    // sequence (HEB, EBI, HKS, HDH, MGK), even when a given entity
     // has no records for this training -- plus any other company code
     // that does appear but isn't one of these five.
     const COST_BREAKDOWN_ENTITY_ORDER =
-        ENTITY_SEQUENCE.concat(["EBI"]);
+        ENTITY_SEQUENCE;
 
     const costBreakdownEntities =
         COST_BREAKDOWN_ENTITY_ORDER.concat(
@@ -18781,10 +18774,7 @@ function renderAllInfoDetails(code){
             entity =>
                 claimedAmountByEntity[entity]
         )
-        .sort(
-            (a, b) =>
-                clean(a).localeCompare(clean(b))
-        )
+        .sort(compareEntitySequence)
         .map(
             entity =>
                 `<div>${escapeHtml(entity)}: ${escapeHtml(formatSessionAmount(claimedAmountByEntity[entity]))}</div>`
@@ -19934,9 +19924,7 @@ function formatGrantIdsForCode(code, checklists, group, item, buttonClass){
                 )
             )
         )
-        .sort(
-            (a, b) => clean(a).localeCompare(clean(b))
-        );
+        .sort(compareEntitySequence);
 
     if(!companiesPresent.length){
         return "-";
@@ -20079,9 +20067,7 @@ function summaryPrintingStatusByEntityHtml(code, checklists, group){
                 )
             )
         )
-        .sort(
-            (a, b) => clean(a).localeCompare(clean(b))
-        );
+        .sort(compareEntitySequence);
 
     const trainingHasHrdfClaimableParticipant =
         group.some(
@@ -20244,9 +20230,7 @@ function summaryPaymentStatusByEntityHtml(code, checklists, group){
                 )
             )
         )
-        .sort(
-            (a, b) => clean(a).localeCompare(clean(b))
-        );
+        .sort(compareEntitySequence);
 
     if(!companiesPresent.length){
         return "-";
@@ -24514,10 +24498,7 @@ function renderRecords(){
                 entity =>
                     claimedAmountByEntity[entity]
             )
-            .sort(
-                (a, b) =>
-                    clean(a).localeCompare(clean(b))
-            );
+            .sort(compareEntitySequence);
 
         const html =
             entities.length
