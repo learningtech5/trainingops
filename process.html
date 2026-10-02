@@ -9319,6 +9319,38 @@ function resolveGradeCode(record){
    BUDGET BUCKET RESOLUTION
 ===================================================== */
 
+/*
+  Standard entity order used wherever entities are listed
+  (HRDC Claims, Balance Payments, Cost Breakdown Pivot):
+  HEB, HKS, HDH, MGK first, then any other entity A-Z.
+*/
+
+const ENTITY_SEQUENCE =
+    ["HEB", "HKS", "HDH", "MGK"];
+
+
+function compareEntitySequence(a, b){
+
+    const indexA =
+        ENTITY_SEQUENCE.indexOf(clean(a).toUpperCase());
+
+    const indexB =
+        ENTITY_SEQUENCE.indexOf(clean(b).toUpperCase());
+
+    if(indexA !== -1 || indexB !== -1){
+
+        if(indexA === -1) return 1;
+        if(indexB === -1) return -1;
+
+        return indexA - indexB;
+
+    }
+
+    return clean(a).localeCompare(clean(b));
+
+}
+
+
 const BUDGET_BUCKETS =
     ["HEB", "HKS", "HDH", "EBS", "CORP", "MGK"];
 
@@ -17435,10 +17467,7 @@ function renderAllInfoDetails(code){
 
     const costingEntities =
         Object.keys(costingByEntity)
-        .sort(
-            (a, b) =>
-                clean(a).localeCompare(clean(b))
-        );
+        .sort(compareEntitySequence);
 
     if(!costingEntities.length){
 
@@ -17634,10 +17663,7 @@ function renderAllInfoDetails(code){
 
     const balanceEntities =
         Object.keys(balanceByEntity)
-        .sort(
-            (a, b) =>
-                clean(a).localeCompare(clean(b))
-        );
+        .sort(compareEntitySequence);
 
 
     /*
@@ -17689,10 +17715,7 @@ function renderAllInfoDetails(code){
 
     const grantBalanceEntities =
         Object.keys(grantBalanceByEntity)
-        .sort(
-            (a, b) =>
-                clean(a).localeCompare(clean(b))
-        );
+        .sort(compareEntitySequence);
 
     if(!grantBalanceEntities.length){
 
@@ -17961,10 +17984,7 @@ function renderAllInfoDetails(code){
 
     const pivotCompanies =
         Array.from(companiesSet)
-        .sort(
-            (a, b) =>
-                clean(a).localeCompare(clean(b))
-        );
+        .sort(compareEntitySequence);
 
     const pivotDivisions =
         Array.from(divisionsSet)
@@ -18558,11 +18578,12 @@ function renderAllInfoDetails(code){
         {};
 
 
-    // Always show the full set of entities, in this fixed order, even
-    // when a given entity has no records for this training -- plus any
-    // other company code that does appear but isn't one of these five.
+    // Always show the full set of entities, in the standard entity
+    // sequence (HEB, HKS, HDH, MGK, then EBI), even when a given entity
+    // has no records for this training -- plus any other company code
+    // that does appear but isn't one of these five.
     const COST_BREAKDOWN_ENTITY_ORDER =
-        ["HEB", "EBI", "HKS", "HDH", "MGK"];
+        ENTITY_SEQUENCE.concat(["EBI"]);
 
     const costBreakdownEntities =
         COST_BREAKDOWN_ENTITY_ORDER.concat(
